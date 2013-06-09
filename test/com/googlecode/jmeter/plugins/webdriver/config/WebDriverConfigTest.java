@@ -9,12 +9,11 @@ import org.apache.jmeter.threads.JMeterVariables;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -339,6 +338,27 @@ public class WebDriverConfigTest {
 
         assertThat((Map<String, WebDriver>)config.getThreadBrowsers(), is(Collections.<String, WebDriver>emptyMap()));
         assertThat(removed, is(nullValue()));
+    }
+
+    @Test
+    public void shouldReturnCapabilitiesIfBrowserImplementsHasCapabilities() {
+        WebDriver browser = mock(WebDriver.class, withSettings().extraInterfaces(HasCapabilities.class));
+        Capabilities capabilities = mock(Capabilities.class);
+        when(((HasCapabilities)browser).getCapabilities()).thenReturn(capabilities);
+
+        config.setThreadBrowser(browser);
+
+        assertThat(config.getThreadBrowserCapabilities(), is(capabilities));
+        verify(((HasCapabilities)browser), times(1)).getCapabilities();
+    }
+
+    @Test
+    public void shouldReturnNullIfBrowserDoesNotImplementsHasCapabilities() {
+        WebDriver browser = mock(WebDriver.class);
+
+        config.setThreadBrowser(browser);
+
+        assertThat(config.getThreadBrowserCapabilities(), is(nullValue()));
     }
 
     @Test

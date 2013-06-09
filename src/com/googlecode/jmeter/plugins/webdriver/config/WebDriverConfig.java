@@ -8,6 +8,8 @@ import org.apache.jmeter.engine.event.LoopIterationEvent;
 import org.apache.jmeter.engine.event.LoopIterationListener;
 import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
+import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
 
@@ -208,6 +210,20 @@ public abstract class WebDriverConfig<T extends WebDriver> extends ConfigTestEle
      * @return a new {@link WebDriver} object.
      */
     protected abstract T createBrowser();
+
+    /**
+     * Call this to access the browser specific {@link Capabilities} instance.  For browsers that do not
+     * support {@link Capabilities}, this method will return null.
+     *
+     * @return the {@link Capabilities} of this browser instance.
+     */
+    protected Capabilities getThreadBrowserCapabilities() {
+        if(getThreadBrowser() instanceof HasCapabilities) {
+            return ((HasCapabilities)getThreadBrowser()).getCapabilities();
+        }
+
+        return null;
+    }
 
     protected T getThreadBrowser() {
         return (T) webdrivers.get(currentThreadName());

@@ -56,6 +56,9 @@ public class WebDriverSampler extends AbstractSampler {
             if(res.isSuccessful()) {
                 res.setResponseMessageOK();
             }
+//            JavascriptExecutor js = (JavascriptExecutor)getWebDriver();
+//            LOGGER.info("perf timing: "+js.executeScript("return (function(w){ if((typeof w.performance != 'undefined') && (typeof w.performance.timing != 'undefined')) {return w.performance.timing;} })(window);"));
+//
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage());
             res.setResponseMessage(ex.toString());

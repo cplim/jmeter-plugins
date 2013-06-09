@@ -1,9 +1,9 @@
-package com.googlecode.jmeter.plugins.webdriver.sampler;
+package com.googlecode.jmeter.plugins.w3c;
 
 /**
  * Properties are based on W3C Navigation Timing recommendation - http://www.w3.org/TR/navigation-timing/
  */
-public class NavigationTimingSampleResult {
+public class NavigationTiming {
     private long navigationStart;
     private long unloadEventStart;
     private long unloadEventEnd;

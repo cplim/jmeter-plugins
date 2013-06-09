@@ -16,9 +16,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -165,5 +163,15 @@ public class WebDriverSamplerTest {
         sampler.setScript("var x=1;");
         sampler.sample(null);
         fail("Did not throw expected exception"); // should throw exception if Browser is null
+    }
+
+    @Test
+    public void shouldNotInvokeW3CTimingWhenBrowserIsNotJavascriptEnabled() {
+
+    }
+
+    @Test
+    public void shouldReturnW3CNavigationTimingWhenBrowserSupports() {
+
     }
 }

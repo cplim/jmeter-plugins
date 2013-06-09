@@ -1,4 +1,4 @@
-package com.googlecode.jmeter.plugins.webdriver.sampler;
+package com.googlecode.jmeter.plugins.w3c;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -6,12 +6,12 @@ import org.junit.Test;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class NavigationTimingSampleResultTest {
-    private NavigationTimingSampleResult result;
+public class NavigationTimingTest {
+    private NavigationTiming result;
 
     @Before
     public void createSampleResult() {
-        result = new NavigationTimingSampleResult();
+        result = new NavigationTiming();
     }
 
     @Test
