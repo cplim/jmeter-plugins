@@ -422,5 +422,5 @@ public class WebDriverConfigTest {
         protected WebDriver createBrowser() {
             return (browsers.isEmpty() ? null : browsers.remove(0));
         }
-    };
+    }
 }
