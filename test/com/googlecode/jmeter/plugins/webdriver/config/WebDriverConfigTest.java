@@ -9,10 +9,7 @@ import org.apache.jmeter.threads.JMeterVariables;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.HasCapabilities;
-import org.openqa.selenium.Proxy;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 
 import java.net.MalformedURLException;
 import java.util.*;
@@ -21,6 +18,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.*;
 
@@ -250,7 +249,7 @@ public class WebDriverConfigTest {
         config.setThreadBrowser(browser);
 
         assertThat((Collection<WebDriver>)config.getThreadBrowsers().values(), hasSize(1));
-        assertThat((Collection<WebDriver>)config.getThreadBrowsers().values(), hasItem(browser));
+        assertThat((Collection<WebDriver>) config.getThreadBrowsers().values(), hasItem(browser));
     }
 
     @Test
@@ -263,7 +262,7 @@ public class WebDriverConfigTest {
 
         config.setThreadBrowser(null);
         assertThat((Collection<WebDriver>)config.getThreadBrowsers().values(), hasSize(1));
-        assertThat((Collection<WebDriver>)config.getThreadBrowsers().values(), hasItem(browser));
+        assertThat((Collection<WebDriver>) config.getThreadBrowsers().values(), hasItem(browser));
     }
 
     @Test
@@ -362,6 +361,24 @@ public class WebDriverConfigTest {
     }
 
     @Test
+    public void shouldReturnJavascriptExecutorIfBrowserImplementsInterface() {
+        WebDriver browser = mock(WebDriver.class, withSettings().extraInterfaces(JavascriptExecutor.class));
+
+        config.setThreadBrowser(browser);
+
+        assertThat(config.getThreadJavascriptExecutor(), is(notNullValue()));
+    }
+
+    @Test
+    public void shouldReturnNoOpExecutorIfBrowserDoesNotImplementsInterface() {
+        WebDriver browser = mock(WebDriver.class);
+
+        config.setThreadBrowser(browser);
+
+        assertThat(config.getThreadJavascriptExecutor(), is(NoOpExecutor.getInstance()));
+    }
+
+    @Test
     public void shouldImplementLoopIterationListener() {
         assertThat(config, is(instanceOf(LoopIterationListener.class)));
     }
@@ -375,6 +392,27 @@ public class WebDriverConfigTest {
 
         assertThat(variables.getObject(WebDriverConfig.BROWSER), is(notNullValue()));
         assertThat((WebDriver) variables.getObject(WebDriverConfig.BROWSER), is(browser));
+    }
+
+    @Test
+    public void shouldAddJavascriptExecutorToJMeterVariablesWhenIterationStartsIfBrowserImplementsInterface() throws Exception {
+        WebDriver browser = mock(WebDriver.class, withSettings().extraInterfaces(JavascriptExecutor.class));
+        JavascriptExecutor jsExecutor = (JavascriptExecutor)browser;
+        config.setThreadBrowser(browser);
+
+        config.iterationStart(null);
+
+        assertThat((JavascriptExecutor)variables.getObject(WebDriverConfig.JAVASCRIPT_EXECUTOR), is(jsExecutor));
+    }
+
+    @Test
+    public void shouldAddNoOpExecutorToJMeterVariablesWhenIterationStartsIfBrowserDoesNotImplementInterface() throws Exception {
+        WebDriver browser = mock(WebDriver.class);
+        config.setThreadBrowser(browser);
+
+        config.iterationStart(null);
+
+        assertThat((JavascriptExecutor)variables.getObject(WebDriverConfig.JAVASCRIPT_EXECUTOR), is(NoOpExecutor.getInstance()));
     }
 
     @Test

@@ -8,10 +8,7 @@ import org.apache.jmeter.engine.event.LoopIterationEvent;
 import org.apache.jmeter.engine.event.LoopIterationListener;
 import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
-import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.HasCapabilities;
-import org.openqa.selenium.Proxy;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,11 +18,16 @@ public abstract class WebDriverConfig<T extends WebDriver> extends ConfigTestEle
     private static final long serialVersionUID = 100L;
     private static final Logger LOGGER = LoggingManager.getLoggerForClass();
 
-
     /**
      * This is the key used to store a WebDriver instance in the {@link org.apache.jmeter.threads.JMeterVariables} object.
      */
     public static final String BROWSER = "Browser";
+
+    /**
+     * This is the key used to store a JavascriptExecutor instance in the {@link org.apache.jmeter.threads.JMeterVariables}
+     * object iff the current WebDriver instance implements the interface.
+     */
+    public static final String JAVASCRIPT_EXECUTOR = "JavascriptExecutor";
 
     /**
      * Ideally we would have stored the WebDriver instances in the JMeterVariables object, however the JMeterVariables
@@ -198,6 +200,7 @@ public abstract class WebDriverConfig<T extends WebDriver> extends ConfigTestEle
             setThreadBrowser(createBrowser());
         }
         getThreadContext().getVariables().putObject(WebDriverConfig.BROWSER, getThreadBrowser());
+        getThreadContext().getVariables().putObject(WebDriverConfig.JAVASCRIPT_EXECUTOR, getThreadJavascriptExecutor());
     }
 
     protected String currentThreadName() {
@@ -225,36 +228,93 @@ public abstract class WebDriverConfig<T extends WebDriver> extends ConfigTestEle
         return null;
     }
 
+    /**
+     * Call this to access the underlying {@link JavascriptExecutor} to execute javascript on the browser. If the
+     * underlying browser does not implement javascript, this method will still return a {@link JavascriptExecutor}, however
+     * all javascript called will do nothing and all methods invoked will always return null.
+     *
+     * @return a {@link JavascriptExecutor} to run the javascript on the browser. If the browser does not support
+     * javascript, the {@link NoOpExecutor} will be returned.
+     */
+    public JavascriptExecutor getThreadJavascriptExecutor() {
+        if(getThreadBrowser() instanceof JavascriptExecutor) {
+            return (JavascriptExecutor)getThreadBrowser();
+        }
+
+        return NoOpExecutor.getInstance();
+    }
+
+    /**
+     * Call this method to return the browser associated with the current thread. This method may return null if no
+     * browser has been set on this thread.
+     *
+     * @return the current browser for the thread, null if none assigned.
+     */
     protected T getThreadBrowser() {
         return (T) webdrivers.get(currentThreadName());
     }
 
+    /**
+     * Determines whether or not the current thread has a browser associated with it.
+     *
+     * @return true if this thread has a browser, false otherwise.
+     */
     protected boolean hasThreadBrowser() {
         return webdrivers.containsKey(currentThreadName());
     }
 
+    /**
+     * Assigns the specified browser for use with this thread, iff the argument is not null.  Browser instances must
+     * not be shared between threads, otherwise the {@link com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler}
+     * will not work as expected.
+     *
+     * @param browser is the browser instance to be used by this thread.
+     */
     protected void setThreadBrowser(T browser) {
         if(browser != null) {
             webdrivers.put(currentThreadName(), browser);
         }
     }
 
+    /**
+     * Removes the browser associated with this thread.
+     *
+     * @return the browser that was associated with this thread, null if no browser was ever assigned.
+     */
     protected T removeThreadBrowser() {
         return (T) webdrivers.remove(currentThreadName());
     }
 
+    /**
+     * Removes ALL browsers from ALL threads. Use this method iff you know what you are doing.
+     */
     void clearThreadBrowsers() {
         webdrivers.clear();
     }
 
+    /**
+     * Returns a map of all browsers for all threads, keyed by each thread's name.
+     *
+     * @return a map of browsers that belong to each thread.
+     */
     Map<String, WebDriver> getThreadBrowsers() {
         return webdrivers;
     }
 
+    /**
+     * EXPERIMENTAL
+     *
+     * @return
+     */
     public boolean isRecreateBrowserOnIterationStart() {
         return getPropertyAsBoolean(RECREATE_ON_ITERATION_START);
     }
 
+    /**
+     * EXPERIMENTAL
+     *
+     * @param recreate
+     */
     public void setRecreateBrowserOnIterationStart(boolean recreate) {
         setProperty(RECREATE_ON_ITERATION_START, recreate);
     }

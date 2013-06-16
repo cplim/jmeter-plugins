@@ -6,6 +6,7 @@ import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
 import javax.script.*;
@@ -56,9 +57,9 @@ public class WebDriverSampler extends AbstractSampler {
             if(res.isSuccessful()) {
                 res.setResponseMessageOK();
             }
-//            JavascriptExecutor js = (JavascriptExecutor)getWebDriver();
-//            LOGGER.info("perf timing: "+js.executeScript("return (function(w){ if((typeof w.performance != 'undefined') && (typeof w.performance.timing != 'undefined')) {return w.performance.timing;} })(window);"));
-//
+            JavascriptExecutor executor = getJavascriptExecutor();
+            LOGGER.info("perf timing: "+executor.executeScript("return (function(w){ if((typeof w.performance != 'undefined') && (typeof w.performance.timing != 'undefined')) {return w.performance.timing;} })(window);"));
+
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage());
             res.setResponseMessage(ex.toString());
@@ -69,7 +70,7 @@ public class WebDriverSampler extends AbstractSampler {
         return res;
 	}
 
-	public String getScript() {
+    public String getScript() {
 		return getPropertyAsString(SCRIPT);
 	}
 	
@@ -87,6 +88,10 @@ public class WebDriverSampler extends AbstractSampler {
 
     private WebDriver getWebDriver() {
         return (WebDriver) getThreadContext().getVariables().getObject(WebDriverConfig.BROWSER);
+    }
+
+    private JavascriptExecutor getJavascriptExecutor() {
+        return (JavascriptExecutor) getThreadContext().getVariables().getObject(WebDriverConfig.JAVASCRIPT_EXECUTOR);
     }
 
     ScriptEngine createScriptEngineWith(SampleResult sampleResult) {

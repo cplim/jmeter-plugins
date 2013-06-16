@@ -7,7 +7,9 @@ import org.apache.jmeter.threads.JMeterVariables;
 import org.apache.log.Logger;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
 import javax.script.ScriptContext;
@@ -27,14 +29,20 @@ public class WebDriverSamplerTest {
     private WebDriverSampler sampler;
     private JMeterVariables variables;
     private WebDriver browser;
+    private JavascriptExecutor javascriptExecutor;
 
     @Before
     public void createSampler() {
+        variables = new JMeterVariables();
+
         browser = Mockito.mock(WebDriver.class);
         when(browser.getPageSource()).thenReturn("page source");
         when(browser.getCurrentUrl()).thenReturn("http://google.com.au");
-        variables = new JMeterVariables();
         variables.putObject(WebDriverConfig.BROWSER, browser);
+
+        javascriptExecutor = Mockito.mock(JavascriptExecutor.class);
+        variables.putObject(WebDriverConfig.JAVASCRIPT_EXECUTOR, javascriptExecutor);
+
         JMeterContextService.getContext().setVariables(variables);
         sampler = new WebDriverSampler();
     }
@@ -166,12 +174,13 @@ public class WebDriverSamplerTest {
     }
 
     @Test
-    public void shouldNotInvokeW3CTimingWhenBrowserIsNotJavascriptEnabled() {
+    public void shouldInvokeW3CNavigationTiming() {
+        ArgumentCaptor<String> perfTimingScript = ArgumentCaptor.forClass(String.class);
 
-    }
+        sampler.sample(null);
 
-    @Test
-    public void shouldReturnW3CNavigationTimingWhenBrowserSupports() {
+        verify(javascriptExecutor, times(1)).executeScript(perfTimingScript.capture());
 
+        assertThat(perfTimingScript.getValue(), containsString("performance.timing"));
     }
 }
