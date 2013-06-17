@@ -1,5 +1,6 @@
 package com.googlecode.jmeter.plugins.webdriver.sampler;
 
+import com.googlecode.jmeter.plugins.w3c.NavigationTiming;
 import com.googlecode.jmeter.plugins.webdriver.config.WebDriverConfig;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
@@ -175,12 +176,94 @@ public class WebDriverSamplerTest {
 
     @Test
     public void shouldInvokeW3CNavigationTiming() {
-        ArgumentCaptor<String> perfTimingScript = ArgumentCaptor.forClass(String.class);
-
         sampler.sample(null);
 
-        verify(javascriptExecutor, times(1)).executeScript(perfTimingScript.capture());
+        ArgumentCaptor<String> performanceTimingScript = ArgumentCaptor.forClass(String.class);
+        verify(javascriptExecutor, times(1)).executeScript(performanceTimingScript.capture());
 
-        assertThat(perfTimingScript.getValue(), containsString("performance.timing"));
+        assertThat(performanceTimingScript.getValue(), containsString("performance.timing"));
+    }
+
+    @Test
+    public void shouldReturnSampleResultWithW3CNavigationTiming() {
+        final long navigationStart = 1371467808230L;
+        final long unloadEventStart = 0;
+        final long unloadEventEnd = 0;
+        final long redirectStart = 0;
+        final long redirectEnd = 0;
+        final long fetchStart = 1371467808230L;
+        final long domainLookupStart = 1371467808231L;
+        final long domainLookupEnd = 1371467808252L;
+        final long connectStart = 1371467808230L;
+        final long connectEnd = 1371467808230L;
+        final long secureConnectionStart = 0;
+        final long requestStart = 1371467808294L;
+        final long responseStart = 1371467808427L;
+        final long responseEnd = 1371467808434L;
+        final long domLoading = 1371467808427L;
+        final long domInteractive = 1371467809096L;
+        final long domContentLoadedEventStart = 1371467809114L;
+        final long domContentLoadedEventEnd = 1371467809181L;
+        final long domComplete = 1371467810901L;
+        final long loadEventStart = 1371467810901L;
+        final long loadEventEnd = 1371467810903L;
+        when(javascriptExecutor.executeScript(anyString())).thenReturn("{fetchStart:" + fetchStart +
+                ", redirectStart:"+redirectStart+
+                ", domComplete:"+domComplete+
+                ", redirectEnd:"+redirectEnd+
+                ", loadEventStart:"+loadEventStart+
+                ", navigationStart:"+navigationStart+
+                ", requestStart:"+requestStart+
+                ", responseEnd:"+responseEnd+
+                ", secureConnectionStart:"+secureConnectionStart+
+                ", domLoading:"+domLoading+
+                ", domInteractive:"+domInteractive+
+                ", domContentLoadedEventStart:"+domContentLoadedEventStart+
+                ", domainLookupEnd:"+domainLookupEnd+
+                ", responseStart:"+responseStart+
+                ", connectEnd:"+connectEnd+
+                ", loadEventEnd:"+loadEventEnd+
+                ", unloadEventStart:"+unloadEventStart+
+                ", connectStart:"+connectStart+
+                ", domContentLoadedEventEnd:"+domContentLoadedEventEnd+
+                ", unloadEventEnd:"+unloadEventEnd+
+                ", domainLookupStart:"+domainLookupStart+"}");
+
+        final WebSampleResult sample = (WebSampleResult)sampler.sample(null);
+        final NavigationTiming navigationTiming = sample.getNavigationTiming();
+
+        assertThat(sample.isSuccessful(), is(true));
+        assertThat(navigationTiming, is(notNullValue()));
+        assertThat(navigationTiming.getFetchStart(), is(navigationStart));
+        assertThat(navigationTiming.getUnloadEventStart(), is(unloadEventStart));
+        assertThat(navigationTiming.getUnloadEventEnd(), is(unloadEventEnd));
+        assertThat(navigationTiming.getRedirectStart(), is(redirectStart));
+        assertThat(navigationTiming.getRedirectEnd(), is(redirectEnd));
+        assertThat(navigationTiming.getFetchStart(), is(fetchStart));
+        assertThat(navigationTiming.getDomainLookupStart(), is(domainLookupStart));
+        assertThat(navigationTiming.getDomainLookupEnd(), is(domainLookupEnd));
+        assertThat(navigationTiming.getConnectStart(), is(connectStart));
+        assertThat(navigationTiming.getConnectEnd(), is(connectEnd));
+        assertThat(navigationTiming.getSecureConnectionStart(), is(secureConnectionStart));
+        assertThat(navigationTiming.getRequestStart(), is(requestStart));
+        assertThat(navigationTiming.getResponseStart(), is(responseStart));
+        assertThat(navigationTiming.getResponseEnd(), is(responseEnd));
+        assertThat(navigationTiming.getDomLoading(), is(domLoading));
+        assertThat(navigationTiming.getDomInteractive(), is(domInteractive));
+        assertThat(navigationTiming.getDomContentLoadedEventStart(), is(domContentLoadedEventStart));
+        assertThat(navigationTiming.getDomContentLoadedEventEnd(), is(domContentLoadedEventEnd));
+        assertThat(navigationTiming.getDomComplete(), is(domComplete));
+        assertThat(navigationTiming.getLoadEventStart(), is(loadEventStart));
+        assertThat(navigationTiming.getLoadEventEnd(), is(loadEventEnd));
+    }
+
+    @Test
+    public void shouldReturnSampleWithoutW3CNavigationTiming() {
+        when(javascriptExecutor.executeScript(anyString())).thenReturn(null);
+
+        final WebSampleResult sample = (WebSampleResult)sampler.sample(null);
+
+        assertThat(sample.isSuccessful(), is(true));
+        assertThat(sample.getNavigationTiming(), is(nullValue()));
     }
 }

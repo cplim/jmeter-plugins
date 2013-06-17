@@ -1,9 +1,11 @@
 package com.googlecode.jmeter.plugins.w3c;
 
+import java.io.Serializable;
+
 /**
  * Properties are based on W3C Navigation Timing recommendation - http://www.w3.org/TR/navigation-timing/
  */
-public class NavigationTiming {
+public class NavigationTiming implements Serializable {
     private long navigationStart;
     private long unloadEventStart;
     private long unloadEventEnd;

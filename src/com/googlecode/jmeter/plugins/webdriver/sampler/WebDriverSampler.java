@@ -1,11 +1,14 @@
 package com.googlecode.jmeter.plugins.webdriver.sampler;
 
+import com.googlecode.jmeter.plugins.w3c.NavigationTiming;
 import com.googlecode.jmeter.plugins.webdriver.config.WebDriverConfig;
 import org.apache.jmeter.samplers.AbstractSampler;
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
+import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
@@ -25,9 +28,13 @@ public class WebDriverSampler extends AbstractSampler {
 	private static final Logger LOGGER = LoggingManager.getLoggerForClass();
     private static final String DEFAULT_ENGINE = "JavaScript";
     private final transient ScriptEngineManager scriptEngineManager;
+    private final transient ObjectMapper mapper;
 
     public WebDriverSampler() {
         this.scriptEngineManager = new ScriptEngineManager();
+        mapper = new ObjectMapper();
+        mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+
     }
 
     @Override
@@ -36,7 +43,7 @@ public class WebDriverSampler extends AbstractSampler {
             throw new IllegalArgumentException("Browser has not been configured.  Please ensure at least 1 WebDriverConfig is created for a ThreadGroup.");
         }
 
-        final SampleResult res = new SampleResult();
+        final WebSampleResult res = new WebSampleResult();
         res.setSampleLabel(getName());
         res.setSamplerData(toString());
         res.setDataType(SampleResult.TEXT);
@@ -58,7 +65,11 @@ public class WebDriverSampler extends AbstractSampler {
                 res.setResponseMessageOK();
             }
             JavascriptExecutor executor = getJavascriptExecutor();
-            LOGGER.info("perf timing: "+executor.executeScript("return (function(w){ if((typeof w.performance != 'undefined') && (typeof w.performance.timing != 'undefined')) {return w.performance.timing;} })(window);"));
+            final Object performanceTiming = executor.executeScript("return (function(w){ if((typeof w.performance != 'undefined') && (typeof w.performance.timing != 'undefined')) {return w.performance.timing;} })(window);");
+            if(performanceTiming != null) {
+                final NavigationTiming navigationTiming = mapper.readValue(performanceTiming.toString(), NavigationTiming.class);
+                res.setNavigationTiming(navigationTiming);
+            }
 
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage());

@@ -3,6 +3,9 @@ package com.googlecode.jmeter.plugins.w3c;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.Serializable;
+
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -12,6 +15,11 @@ public class NavigationTimingTest {
     @Before
     public void createSampleResult() {
         result = new NavigationTiming();
+    }
+
+    @Test
+    public void shouldBeSerializable() {
+        assertThat(result, instanceOf(Serializable.class));
     }
 
     @Test
