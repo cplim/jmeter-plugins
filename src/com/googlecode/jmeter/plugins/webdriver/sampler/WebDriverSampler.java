@@ -34,7 +34,6 @@ public class WebDriverSampler extends AbstractSampler {
         this.scriptEngineManager = new ScriptEngineManager();
         mapper = new ObjectMapper();
         mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-
     }
 
     @Override
@@ -64,13 +63,7 @@ public class WebDriverSampler extends AbstractSampler {
             if(res.isSuccessful()) {
                 res.setResponseMessageOK();
             }
-            JavascriptExecutor executor = getJavascriptExecutor();
-            final Object performanceTiming = executor.executeScript("return (function(w){ if((typeof w.performance != 'undefined') && (typeof w.performance.timing != 'undefined')) {return w.performance.timing;} })(window);");
-            if(performanceTiming != null) {
-                final NavigationTiming navigationTiming = mapper.readValue(performanceTiming.toString(), NavigationTiming.class);
-                res.setNavigationTiming(navigationTiming);
-            }
-
+            measureNavigationTiming(res);
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage());
             res.setResponseMessage(ex.toString());
@@ -80,6 +73,16 @@ public class WebDriverSampler extends AbstractSampler {
 
         return res;
 	}
+
+    private void measureNavigationTiming(WebSampleResult res) {
+        try {
+            final Object performanceTiming = getJavascriptExecutor().executeScript("return (function(w){ if((typeof w.performance != 'undefined') && (typeof w.performance.timing != 'undefined')) {return w.performance.timing;} })(window);");
+            final NavigationTiming navigationTiming = mapper.convertValue(performanceTiming, NavigationTiming.class);
+            res.setNavigationTiming(navigationTiming);
+        } catch (IllegalArgumentException e) {
+            LOGGER.warn(e.getMessage());
+        }
+    }
 
     public String getScript() {
 		return getPropertyAsString(SCRIPT);

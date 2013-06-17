@@ -18,6 +18,8 @@ import javax.script.ScriptEngine;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.core.Is.is;
@@ -207,27 +209,30 @@ public class WebDriverSamplerTest {
         final long domComplete = 1371467810901L;
         final long loadEventStart = 1371467810901L;
         final long loadEventEnd = 1371467810903L;
-        when(javascriptExecutor.executeScript(anyString())).thenReturn("{fetchStart:" + fetchStart +
-                ", redirectStart:"+redirectStart+
-                ", domComplete:"+domComplete+
-                ", redirectEnd:"+redirectEnd+
-                ", loadEventStart:"+loadEventStart+
-                ", navigationStart:"+navigationStart+
-                ", requestStart:"+requestStart+
-                ", responseEnd:"+responseEnd+
-                ", secureConnectionStart:"+secureConnectionStart+
-                ", domLoading:"+domLoading+
-                ", domInteractive:"+domInteractive+
-                ", domContentLoadedEventStart:"+domContentLoadedEventStart+
-                ", domainLookupEnd:"+domainLookupEnd+
-                ", responseStart:"+responseStart+
-                ", connectEnd:"+connectEnd+
-                ", loadEventEnd:"+loadEventEnd+
-                ", unloadEventStart:"+unloadEventStart+
-                ", connectStart:"+connectStart+
-                ", domContentLoadedEventEnd:"+domContentLoadedEventEnd+
-                ", unloadEventEnd:"+unloadEventEnd+
-                ", domainLookupStart:"+domainLookupStart+"}");
+        final Map<String, String> json = new HashMap<String, String>();
+        json.put("fetchStart", String.valueOf(fetchStart));
+        json.put("redirectStart", String.valueOf(redirectStart));
+        json.put("domComplete", String.valueOf(domComplete));
+        json.put("redirectEnd", String.valueOf(redirectEnd));
+        json.put("loadEventStart", String.valueOf(loadEventStart));
+        json.put("navigationStart", String.valueOf(navigationStart));
+        json.put("requestStart", String.valueOf(requestStart));
+        json.put("responseEnd", String.valueOf(responseEnd));
+        json.put("secureConnectionStart", String.valueOf(secureConnectionStart));
+        json.put("domLoading", String.valueOf(domLoading));
+        json.put("domInteractive", String.valueOf(domInteractive));
+        json.put("domContentLoadedEventStart", String.valueOf(domContentLoadedEventStart));
+        json.put("domainLookupEnd", String.valueOf(domainLookupEnd));
+        json.put("responseStart", String.valueOf(responseStart));
+        json.put("connectEnd", String.valueOf(connectEnd));
+        json.put("loadEventEnd", String.valueOf(loadEventEnd));
+        json.put("unloadEventStart", String.valueOf(unloadEventStart));
+        json.put("connectStart", String.valueOf(connectStart));
+        json.put("domContentLoadedEventEnd", String.valueOf(domContentLoadedEventEnd));
+        json.put("unloadEventEnd", String.valueOf(unloadEventEnd));
+        json.put("domainLookupStart", String.valueOf(domainLookupStart));
+
+        when(javascriptExecutor.executeScript(anyString())).thenReturn(json);
 
         final WebSampleResult sample = (WebSampleResult)sampler.sample(null);
         final NavigationTiming navigationTiming = sample.getNavigationTiming();
@@ -260,6 +265,16 @@ public class WebDriverSamplerTest {
     @Test
     public void shouldReturnSampleWithoutW3CNavigationTiming() {
         when(javascriptExecutor.executeScript(anyString())).thenReturn(null);
+
+        final WebSampleResult sample = (WebSampleResult)sampler.sample(null);
+
+        assertThat(sample.isSuccessful(), is(true));
+        assertThat(sample.getNavigationTiming(), is(nullValue()));
+    }
+
+    @Test
+    public void shouldReturnSampleWithoutW3CNavigationTimingWhenObjectMapperThrowsException() {
+        when(javascriptExecutor.executeScript(anyString())).thenReturn("hello world");
 
         final WebSampleResult sample = (WebSampleResult)sampler.sample(null);
 
