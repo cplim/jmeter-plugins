@@ -274,7 +274,7 @@ public class WebDriverSamplerTest {
 
     @Test
     public void shouldReturnSampleWithoutW3CNavigationTimingWhenObjectMapperThrowsException() {
-        when(javascriptExecutor.executeScript(anyString())).thenReturn("hello world");
+        when(javascriptExecutor.executeScript(anyString())).thenReturn("invalid json string (will cause exception to be thrown)");
 
         final WebSampleResult sample = (WebSampleResult)sampler.sample(null);
 
