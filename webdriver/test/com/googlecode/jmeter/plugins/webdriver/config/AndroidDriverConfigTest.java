@@ -1,5 +1,6 @@
 package com.googlecode.jmeter.plugins.webdriver.config;
 
+import io.selendroid.SelendroidDriver;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
 import org.junit.After;
@@ -7,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.openqa.selenium.android.AndroidDriver;
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -67,20 +68,28 @@ public class AndroidDriverConfigTest {
 
     @Test
     public void shouldCreateAndroidDriver() throws Exception {
-        AndroidDriver mockAndroidDriver = Mockito.mock(AndroidDriver.class);
-        whenNew(AndroidDriver.class).withParameterTypes(URL.class, DesiredCapabilities.class).withArguments(isA(URL.class), isA(DesiredCapabilities.class)).thenReturn(mockAndroidDriver);
+        SelendroidDriver mockAndroidDriver = Mockito.mock(SelendroidDriver.class);
+        whenNew(SelendroidDriver.class).withParameterTypes(URL.class, Capabilities.class).withArguments(isA(URL.class), isA(Capabilities.class)).thenReturn(mockAndroidDriver);
 
-        final AndroidDriver browser = config.createBrowser();
+        final SelendroidDriver browser = config.createBrowser();
 
         assertThat(browser, is(mockAndroidDriver));
-        verifyNew(AndroidDriver.class, times(1)).withArguments(isA(URL.class), isA(DesiredCapabilities.class));
+        verifyNew(SelendroidDriver.class, times(1)).withArguments(isA(URL.class), isA(Capabilities.class));
     }
 
     @Test
     public void shouldHandleInvalidUrl() throws Exception {
-        whenNew(AndroidDriver.class).withParameterTypes(URL.class, DesiredCapabilities.class).withArguments(isA(URL.class), isA(DesiredCapabilities.class)).thenThrow(new MalformedURLException("testing123"));
+        whenNew(SelendroidDriver.class).withParameterTypes(URL.class, Capabilities.class).withArguments(isA(URL.class), isA(Capabilities.class)).thenThrow(new MalformedURLException("testing123"));
 
-        final AndroidDriver browser = config.createBrowser();
+        final SelendroidDriver browser = config.createBrowser();
+        assertNull(browser);
+    }
+
+    @Test
+    public void shouldHandleConstructionError() throws Exception {
+        whenNew(SelendroidDriver.class).withParameterTypes(URL.class, Capabilities.class).withArguments(isA(URL.class), isA(Capabilities.class)).thenThrow(new Exception("testing123"));
+
+        final SelendroidDriver browser = config.createBrowser();
         assertNull(browser);
     }
 

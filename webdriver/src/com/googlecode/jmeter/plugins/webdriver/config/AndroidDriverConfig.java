@@ -1,8 +1,9 @@
 package com.googlecode.jmeter.plugins.webdriver.config;
 
+import io.selendroid.SelendroidCapabilities;
+import io.selendroid.SelendroidDriver;
 import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
-import org.openqa.selenium.android.AndroidDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
@@ -13,7 +14,7 @@ import java.net.URL;
  * @author Sergey Marakhov
  * @author Linh Pham
  */
-public class AndroidDriverConfig extends WebDriverConfig<AndroidDriver> {
+public class AndroidDriverConfig extends WebDriverConfig<SelendroidDriver> {
     private static final long serialVersionUID = 100L;
 
     private static final Logger LOGGER = LoggingManager.getLoggerForClass();
@@ -21,17 +22,21 @@ public class AndroidDriverConfig extends WebDriverConfig<AndroidDriver> {
     private static final String ANDROID_DRIVER_HOST_PORT = "AndroidDriverConfig.driver_host_port";
 
     DesiredCapabilities createCapabilities() {
-        DesiredCapabilities capabilities = new DesiredCapabilities();
+        DesiredCapabilities capabilities = SelendroidCapabilities.android();
         capabilities.setCapability(CapabilityType.PROXY, createProxy());
         return capabilities;
     }
 
     @Override
-    protected AndroidDriver createBrowser() {
+    protected SelendroidDriver createBrowser() {
         try {
-            return new AndroidDriver(new URL(getAndroidDriverUrl()), createCapabilities());
+            return new SelendroidDriver(new URL(getAndroidDriverUrl()), createCapabilities());
         } catch (MalformedURLException e) {
             LOGGER.error("MalformedURLException thrown for invalid URL: " + getAndroidDriverUrl());
+            return null;
+        } catch (Exception e) {
+            LOGGER.error("Exception thrown when constructing Selenium Android Driver: " + e.getMessage());
+            LOGGER.debug("Stacktrace:", e);
             return null;
         }
     }
