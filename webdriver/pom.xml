@@ -39,9 +39,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java-version>1.6</java-version>
-        <jmeter.version>2.8</jmeter.version>
-        <selenium.version>2.42.2</selenium.version>
-        <selendroid.version>0.10.0</selendroid.version>
+        <selenium.version>2.43.1</selenium.version>
+        <selendroid.version>0.12.0</selendroid.version>
         <powermock.version>1.5</powermock.version>
         <cobertura-maven.version>2.5.2</cobertura-maven.version>
     </properties>
