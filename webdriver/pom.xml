@@ -268,7 +268,7 @@
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>false</overWriteSnapshots>
                             <overWriteIfNewer>true</overWriteIfNewer>
-                            <includeArtifactIds>selenium-support,selenium-api,selenium-remote-driver,selenium-firefox-driver,selenium-chrome-driver,selenium-android-driver,selenium-htmlunit-driver,
+                            <includeArtifactIds>selenium-support,selenium-api,selenium-remote-driver,selenium-firefox-driver,selenium-chrome-driver,selenium-android-driver,selenium-htmlunit-driver,selendroid-client,selendroid-common,selendroid-server-common,
                             	guava,json,commons-exec,jsyntaxpane,htmlunit,htmlunit-core-js,nekohtml,cssparser,jetty-websocket,xercesImpl,xml-apis,sac,httpclient,httpmime,httpcore
                             </includeArtifactIds>
                         </configuration>
